@@ -1,48 +1,58 @@
+import React, { Suspense } from "react";
+import { Routes, Route, NavLink } from "react-router-dom";
+import "./App.css";
 
-import React, { useState } from "react";
-import { useEffect } from "react";
-import { getPopularMovies } from "./services/api";   
-import './App.css';
-import MovieCard from './components/MovieCard';
+// Lazy load mini-apps (fast initial load)
+const MoviesApp = React.lazy(() => import("./movies"));
+const TodoApp = React.lazy(() => import("./todos"));
 
-function App() {
-    const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-   const map = (list = []) =>
-    list.map((m) => ({
-      title: m.title || m.name || "Untitled",
-      year: m.release_date ? m.release_date.slice(0, 4) : "—",
-      rating: m.vote_average ? String(m.vote_average) : "—",
-      poster: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : null,
-    }));
-
-  useEffect(() => {
-    setLoading(true);
-    getPopularMovies()
-      .then((res) => setMovies(map(res)))
-      .finally(() => setLoading(false));
-  }, []);
-
- 
+export default function App() {
+  const navLinkClass = ({ isActive }) =>
+    `px-4 py-2 rounded-lg font-medium ${
+      isActive ? "bg-yellow-400 text-black" : "text-gray-300 hover:bg-gray-800"
+    }`;
 
   return (
-  <div className="min-h-screen bg-gray-900 text-white flex items-start justify-center py-10">
-      <div className="w-full max-w-6xl px-4">
-        <h1 className="text-3xl font-bold text-yellow-400 mb-6">🎬 Popular Movies</h1>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-5xl mx-auto">
 
-        {loading ? (
-          <div className="text-center py-10">Loading...</div>
-        ) : (
-          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {movies.map((m, i) => (
-              <MovieCard key={i} movie={m} />
-            ))}
-          </section>
-        )}
+        {/* HEADER */}
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-yellow-400 mb-4">
+            Mini Projects Hub
+          </h1>
+
+          {/* NAVIGATION */}
+          <nav className="flex gap-4">
+            <NavLink to="/movies" className={navLinkClass}>
+              🎬 Movies
+            </NavLink>
+            <NavLink to="/todo" className={navLinkClass}>
+              📝 Todo
+            </NavLink>
+          </nav>
+        </header>
+
+        {/* ROUTES */}
+        <main className="mt-4">
+          <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <div className="text-center text-gray-300 py-20">
+                    Select an app from above 👆
+                  </div>
+                }
+              />
+
+              <Route path="/movies/*" element={<MoviesApp />} />
+              <Route path="/todo/*" element={<TodoApp />} />
+            </Routes>
+          </Suspense>
+        </main>
+
       </div>
     </div>
   );
 }
-
-export default App;
