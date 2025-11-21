@@ -6,6 +6,7 @@ import "./App.css";
 const MoviesApp = React.lazy(() => import("./movies"));
 const TodoApp = React.lazy(() => import("./todos"));
 const ThemeApp = React.lazy(() => import("./ThemeChanger"));
+const NotesApp = React.lazy(() => import("./notes"));
 
 export default function App() {
   const navLinkClass = ({ isActive }) =>
@@ -35,6 +36,9 @@ export default function App() {
             <NavLink to="/theme" className={navLinkClass}>  
               🎨 Theme
             </NavLink>
+            <NavLink to="/notes" className={navLinkClass}>  
+              Notes
+            </NavLink>
           </nav>
         </header>
 
@@ -54,6 +58,7 @@ export default function App() {
               <Route path="/movies/*" element={<MoviesApp />} />
               <Route path="/todo/*" element={<TodoApp />} />
                 <Route path="/theme/*" element={<ThemeApp />} />
+                <Route path="/notes" element={<NotesApp />} />
             </Routes>
           </Suspense>
         </main>
