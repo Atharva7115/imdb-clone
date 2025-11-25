@@ -1,4 +1,3 @@
-// src/movies/MoviesApp.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { getPopularMovies, fetchMovies } from "../services/api";
 import "../App.css";
@@ -18,8 +17,8 @@ const mapMovies = (list = []) =>
 export default function MoviesApp() {
   const [movies, setMovies] = useState([]);
 
-  const [loading, setLoading] = useState(false);        // main loading
-  const [loadingMore, setLoadingMore] = useState(false); // "Load More" loading
+  const [loading, setLoading] = useState(false); // main loading
+  const [loadingMore, setLoadingMore] = useState(false); // Load More spinner
 
   // search-related state
   const [query, setQuery] = useState("");
@@ -30,15 +29,14 @@ export default function MoviesApp() {
   const [totalPages, setTotalPages] = useState(1);
   const [mode, setMode] = useState("popular"); // "popular" | "search"
 
-  // keep reference to debounce timer
+  // debounce timer ref
   const debounceRef = useRef(null);
 
-  // ---------- helpers ----------
+  // -------- helpers (popular + search, paginated) --------
 
   const loadPopular = async (pageNumber = 1, append = false) => {
     try {
-      if (append) setLoadingMore(true);
-      else setLoading(true);
+      append ? setLoadingMore(true) : setLoading(true);
 
       const { results, totalPages } = await getPopularMovies(pageNumber);
       const mapped = mapMovies(results);
@@ -48,21 +46,19 @@ export default function MoviesApp() {
 
       setMovies((prev) => (append ? [...prev, ...mapped] : mapped));
     } catch (err) {
-      console.error(err);
+      console.error("Error loading popular movies:", err);
       if (!append) {
         setMovies([]);
         setNoResults(true);
       }
     } finally {
-      if (append) setLoadingMore(false);
-      else setLoading(false);
+      append ? setLoadingMore(false) : setLoading(false);
     }
   };
 
   const loadSearch = async (searchTerm, pageNumber = 1, append = false) => {
     try {
-      if (append) setLoadingMore(true);
-      else setLoading(true);
+      append ? setLoadingMore(true) : setLoading(true);
 
       const { results, totalPages } = await fetchMovies(searchTerm, pageNumber);
       const mapped = mapMovies(results);
@@ -72,18 +68,17 @@ export default function MoviesApp() {
 
       setMovies((prev) => (append ? [...prev, ...mapped] : mapped));
     } catch (err) {
-      console.error(err);
+      console.error(`Error searching movies for "${searchTerm}":`, err);
       if (!append) {
         setMovies([]);
         setNoResults(true);
       }
     } finally {
-      if (append) setLoadingMore(false);
-      else setLoading(false);
+      append ? setLoadingMore(false) : setLoading(false);
     }
   };
 
-  // initial popular load
+  // initial load
   useEffect(() => {
     setMode("popular");
     setPage(1);
@@ -91,7 +86,7 @@ export default function MoviesApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // debounced search effect
+  // debounced search behavior
   useEffect(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -99,8 +94,8 @@ export default function MoviesApp() {
 
     const trimmed = query.trim();
 
-    // if query empty -> show popular
     if (!trimmed) {
+      // back to popular
       debounceRef.current = setTimeout(() => {
         setMode("popular");
         setPage(1);
@@ -109,22 +104,23 @@ export default function MoviesApp() {
       return () => clearTimeout(debounceRef.current);
     }
 
-    // otherwise debounce the search API call
+    // search mode
     debounceRef.current = setTimeout(() => {
       setMode("search");
       setPage(1);
       loadSearch(trimmed, 1, false);
-    }, 500); // 500ms debounce
+    }, 500);
 
-    return () => clearTimeout(debounceRef.current);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   const hasMore = page < totalPages;
 
   const handleLoadMore = () => {
-    if (loadingMore) return;
-    if (!hasMore) return;
+    if (loadingMore || !hasMore) return;
 
     const nextPage = page + 1;
     setPage(nextPage);
@@ -137,80 +133,88 @@ export default function MoviesApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-start justify-center py-10">
-      <div className="w-full max-w-6xl px-4">
-        <header className="mb-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <img
-              src="/mnt/data/b008d04c-3c26-4641-a8f2-b8c0081a7261.png"
-              alt="logo"
-              className="w-12 h-12 rounded-md object-cover"
-            />
-            <h1 className="text-3xl font-bold text-yellow-400">
-              🎬 {mode === "popular" ? "Popular Movies" : "Search Results"}
-            </h1>
-          </div>
-
-          <form
-            onSubmit={(e) => e.preventDefault()}
-            className="w-full max-w-xl flex items-center gap-2"
-          >
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search movies by title..."
-              className="flex-1 px-3 py-2 rounded-md bg-gray-800 border border-gray-700 outline-none"
-              aria-label="Search movies"
-            />
-
-            <button
-              type="button"
-              onClick={() => {
-                setQuery("");
-                if (debounceRef.current) clearTimeout(debounceRef.current);
-                setMode("popular");
-                setPage(1);
-                loadPopular(1, false);
-              }}
-              className="ml-2 px-3 py-2 rounded-md border border-gray-700 text-gray-300"
-            >
-              Reset
-            </button>
-          </form>
-        </header>
-
-        {loading && !loadingMore ? (
-          <div className="text-center py-10">Loading...</div>
-        ) : (
-          <>
-            {noResults && query.trim() !== "" ? (
-              <div className="text-center text-gray-400 py-10">
-                No Results Found
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex justify-center py-10 px-4">
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Big white card wrapping header + grid + button */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 px-4 sm:px-8 py-6 space-y-6">
+          {/* HEADER + SEARCH */}
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <img
+                src="/mnt/data/b008d04c-3c26-4641-a8f2-b8c0081a7261.png"
+                alt="logo"
+                className="w-12 h-12 rounded-xl object-cover shadow-md"
+              />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-yellow-500">
+                  🎬 {mode === "popular" ? "Popular Movies" : "Search Results"}
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Browse trending titles or search for your favorite movies.
+                </p>
               </div>
-            ) : (
-              <>
-                <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {movies.map((m) => (
-                    <MovieCard key={m.id || m.title} movie={m} />
-                  ))}
-                </section>
+            </div>
 
-                {hasMore && (
-                  <div className="mt-8 flex justify-center">
-                    <button
-                      onClick={handleLoadMore}
-                      disabled={loadingMore}
-                      className="px-4 py-2 rounded-md bg-gray-800 border border-gray-700 text-sm disabled:opacity-60"
-                    >
-                      {loadingMore ? "Loading..." : "Load More"}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="w-full sm:w-auto flex flex-col sm:flex-row gap-2 items-stretch sm:items-center"
+            >
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search movies by title..."
+                className="flex-1 px-3 py-2 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 outline-none focus:ring-2 focus:ring-yellow-400"
+                aria-label="Search movies"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  if (debounceRef.current) clearTimeout(debounceRef.current);
+                  setMode("popular");
+                  setPage(1);
+                  loadPopular(1, false);
+                }}
+                className="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Reset
+              </button>
+            </form>
+          </header>
+
+          {/* CONTENT */}
+          {loading && !loadingMore ? (
+            <div className="text-center py-10">Loading...</div>
+          ) : noResults && query.trim() !== "" ? (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-10">
+              No Results Found
+            </div>
+          ) : (
+            <>
+              <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {movies.map((m) => (
+                  <MovieCard key={m.id || m.title} movie={m} />
+                ))}
+              </section>
+
+              {hasMore && (
+                <div className="mt-4 flex justify-center">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="px-6 py-2 rounded-full bg-yellow-400 text-black
+                               text-sm font-semibold shadow-md hover:shadow-lg
+                               hover:bg-yellow-500 disabled:opacity-60 disabled:cursor-not-allowed
+                               transition-all duration-200"
+                  >
+                    {loadingMore ? "Loading..." : "Load More"}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

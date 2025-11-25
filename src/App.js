@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import "./App.css";
+import ThemeToggle from "./ThemeChanger/components/ThemeToggle";
 
 // Lazy load mini-apps (fast initial load)
 const MoviesApp = React.lazy(() => import("./movies"));
@@ -40,6 +41,7 @@ export default function App() {
               Notes
             </NavLink>
           </nav>
+            <ThemeToggle />
         </header>
 
         {/* ROUTES */}
