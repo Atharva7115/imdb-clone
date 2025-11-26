@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { getPopularMovies, fetchMovies } from "../services/api";
 import "../App.css";
 import MovieCard from "./components/MovieCard";
+import Loader from "../components/Loader";
+import ErrorMessage from "../components/ErrorMessage";
+import EmptyState from "../components/EmptyState";
 
 const mapMovies = (list = []) =>
   list.map((m) => ({
@@ -17,8 +20,9 @@ const mapMovies = (list = []) =>
 export default function MoviesApp() {
   const [movies, setMovies] = useState([]);
 
-  const [loading, setLoading] = useState(false); // main loading
+  const [loading, setLoading] = useState(false);        // main loading
   const [loadingMore, setLoadingMore] = useState(false); // Load More spinner
+  const [error, setError] = useState(null);             // error message string
 
   // search-related state
   const [query, setQuery] = useState("");
@@ -36,6 +40,7 @@ export default function MoviesApp() {
 
   const loadPopular = async (pageNumber = 1, append = false) => {
     try {
+      setError(null); // clear previous error
       append ? setLoadingMore(true) : setLoading(true);
 
       const { results, totalPages } = await getPopularMovies(pageNumber);
@@ -43,13 +48,13 @@ export default function MoviesApp() {
 
       setTotalPages(totalPages);
       setNoResults(mapped.length === 0 && pageNumber === 1);
-
       setMovies((prev) => (append ? [...prev, ...mapped] : mapped));
     } catch (err) {
       console.error("Error loading popular movies:", err);
       if (!append) {
         setMovies([]);
         setNoResults(true);
+        setError("Failed to load popular movies. Please try again.");
       }
     } finally {
       append ? setLoadingMore(false) : setLoading(false);
@@ -58,6 +63,7 @@ export default function MoviesApp() {
 
   const loadSearch = async (searchTerm, pageNumber = 1, append = false) => {
     try {
+      setError(null); // clear previous error
       append ? setLoadingMore(true) : setLoading(true);
 
       const { results, totalPages } = await fetchMovies(searchTerm, pageNumber);
@@ -65,13 +71,13 @@ export default function MoviesApp() {
 
       setTotalPages(totalPages);
       setNoResults(mapped.length === 0 && pageNumber === 1);
-
       setMovies((prev) => (append ? [...prev, ...mapped] : mapped));
     } catch (err) {
       console.error(`Error searching movies for "${searchTerm}":`, err);
       if (!append) {
         setMovies([]);
         setNoResults(true);
+        setError(`Failed to search movies for "${searchTerm}". Please try again.`);
       }
     } finally {
       append ? setLoadingMore(false) : setLoading(false);
@@ -132,6 +138,19 @@ export default function MoviesApp() {
     }
   };
 
+  const handleRetry = () => {
+    if (mode === "popular") {
+      loadPopular(page || 1, false);
+    } else {
+      const trimmed = query.trim();
+      if (trimmed) {
+        loadSearch(trimmed, page || 1, false);
+      } else {
+        loadPopular(1, false);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex justify-center py-10 px-4">
       <div className="w-full max-w-7xl mx-auto">
@@ -185,11 +204,17 @@ export default function MoviesApp() {
 
           {/* CONTENT */}
           {loading && !loadingMore ? (
-            <div className="text-center py-10">Loading...</div>
-          ) : noResults && query.trim() !== "" ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-10">
-              No Results Found
-            </div>
+            <Loader />
+          ) : error ? (
+            <ErrorMessage message={error} onRetry={handleRetry} />
+          ) : noResults ? (
+            <EmptyState
+              message={
+                query.trim()
+                  ? "No movies found for this search."
+                  : "No movies available to display."
+              }
+            />
           ) : (
             <>
               <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
