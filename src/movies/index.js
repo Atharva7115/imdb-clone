@@ -5,6 +5,8 @@ import MovieCard from "./components/MovieCard";
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
 import EmptyState from "../components/EmptyState";
+import { FavoritesProvider } from "../movies/context/FavoritesContext";
+
 
 const mapMovies = (list = []) =>
   list.map((m) => ({

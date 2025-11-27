@@ -5,13 +5,17 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './ThemeChanger/ThemeContext';
+import { FavoritesProvider } from "./movies/context/FavoritesContext";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
     <ThemeProvider>
-    <App />
+           <FavoritesProvider>
+            <App />
+           </FavoritesProvider>
+    
     </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>

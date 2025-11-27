@@ -1,30 +1,11 @@
 
-
-
-// const MovieCard = ({ movie }) => {
-//   return (
-//     <div className="bg-gray-800 text-white rounded-2xl shadow-md overflow-hidden w-64 transform transition duration-300 hover:scale-105 hover:shadow-lg">
-//       <img
-//         src={movie.poster}
-//         alt={movie.title}
-//         className="w-full h-80 object-cover"
-//       />
-//       <div className="p-4">
-//         <h2 className="text-lg font-semibold truncate">{movie.title}</h2>
-//         <div className="flex justify-between items-center mt-2 text-sm text-gray-400">
-//           <p>{movie.year}</p>
-//           <p className="text-yellow-400 font-semibold">⭐ {movie.rating}</p>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default MovieCard;
 import React from "react";
-
+import { useFavorites } from "../context/FavoritesContext";
 export default function MovieCard({ movie }) {
-  const { title, year, rating, poster } = movie;
+   const { isFavorite, toggleFavorite } = useFavorites();
+     const { id , title, year, rating, poster  } = movie;
+    const fav = isFavorite(id);
+
 
   return (
     <article
@@ -48,6 +29,12 @@ export default function MovieCard({ movie }) {
 
         {/* subtle gradient overlay at bottom */}
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+         <button
+          onClick={() => toggleFavorite(movie)}
+          className="absolute top-3 right-3 text-2xl drop-shadow-md transition-transform hover:scale-110"
+        >
+          {fav ? "❤️" : "🤍"}
+        </button>
       </div>
 
       <div className="p-4 flex flex-col gap-1">

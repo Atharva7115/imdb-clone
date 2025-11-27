@@ -3,11 +3,14 @@ import { Routes, Route, NavLink } from "react-router-dom";
 import "./App.css";
 import ThemeToggle from "./ThemeChanger/components/ThemeToggle";
 
+
+
 // Lazy load mini-apps (fast initial load)
 const MoviesApp = React.lazy(() => import("./movies"));
 const TodoApp = React.lazy(() => import("./todos"));
 const ThemeApp = React.lazy(() => import("./ThemeChanger"));
 const NotesApp = React.lazy(() => import("./notes"));
+const FavoritesPage = React.lazy(() => import("./movies/Favorites"));
 
 export default function App() {
   const navLinkClass = ({ isActive }) =>
@@ -30,6 +33,10 @@ export default function App() {
             <NavLink to="/movies" className={navLinkClass}>
               🎬 Movies
             </NavLink>
+            <NavLink to="/favorites" className={navLinkClass}>
+  ❤️ Favorites
+</NavLink>
+
             <NavLink to="/todo" className={navLinkClass}>
               📝 Todo
             </NavLink>
@@ -56,8 +63,8 @@ export default function App() {
                   </div>
                 }
               />
-
-              <Route path="/movies/*" element={<MoviesApp />} />
+                <Route path="/favorites" element={ <FavoritesPage /> }/>
+              <Route path="/movies/*" element={  <MoviesApp />} />
               <Route path="/todo/*" element={<TodoApp />} />
                 <Route path="/theme/*" element={<ThemeApp />} />
                 <Route path="/notes" element={<NotesApp />} />
