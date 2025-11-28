@@ -11,6 +11,7 @@ const TodoApp = React.lazy(() => import("./todos"));
 const ThemeApp = React.lazy(() => import("./ThemeChanger"));
 const NotesApp = React.lazy(() => import("./notes"));
 const FavoritesPage = React.lazy(() => import("./movies/Favorites"));
+const MovieDetails = React.lazy(() => import("./movies/MovieDetails")); 
 
 export default function App() {
   const navLinkClass = ({ isActive }) =>
@@ -65,6 +66,7 @@ export default function App() {
               />
                 <Route path="/favorites" element={ <FavoritesPage /> }/>
               <Route path="/movies/*" element={  <MoviesApp />} />
+              <Route path="/movies/:id" element={<MovieDetails />} />
               <Route path="/todo/*" element={<TodoApp />} />
                 <Route path="/theme/*" element={<ThemeApp />} />
                 <Route path="/notes" element={<NotesApp />} />

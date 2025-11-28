@@ -50,3 +50,20 @@ export const getPopularMovies = async (page = 1) => {
     return { results: [], totalPages: 1 }; // safe fallback
   }
 };
+
+export const getMovieDetails = async (id) => {
+  try {
+    const response = await fetch(
+      `${baseUrl}/movie/${id}?api_key=${apiKey}&append_to_response=credits`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch movie details");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Movie details error:", error);
+    return null;
+  }
+};
