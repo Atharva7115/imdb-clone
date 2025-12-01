@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { getMovieDetails } from "../services/api";
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
+import ReviewSection from "./components/ReviewSection";
 
 export default function MovieDetails() {
   const { id } = useParams();
@@ -159,6 +160,8 @@ export default function MovieDetails() {
               )}
             </div>
           </div>
+    <ReviewSection movieId={id} movieTitle={title} />
+
         </section>
       </div>
     </div>
