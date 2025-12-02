@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './ThemeChanger/ThemeContext';
+import { AuthProvider } from './auth/AuthContext';
 import { FavoritesProvider } from "./movies/context/FavoritesContext";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -12,10 +13,11 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
     <ThemeProvider>
-           <FavoritesProvider>
+    <AuthProvider>
+       <FavoritesProvider>
             <App />
            </FavoritesProvider>
-    
+    </AuthProvider>
     </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>
