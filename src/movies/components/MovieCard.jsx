@@ -6,7 +6,7 @@ export default function MovieCard({ movie }) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { id, title, year, rating, poster } = movie;
 
-  const fav = isFavorite(id);
+  const inWatchlist = isFavorite(id);
 
   return (
     <article
@@ -14,16 +14,29 @@ export default function MovieCard({ movie }) {
                  overflow-hidden transform hover:-translate-y-1 transition-all duration-300
                  border border-gray-200/60 dark:border-gray-700/60 relative"
     >
-      {/* HEART BUTTON (does NOT navigate) */}
+      {/* WATCHLIST BUTTON (does NOT navigate) */}
       <button
         onClick={(e) => {
-          e.stopPropagation(); // prevent navigating
-          e.preventDefault();  // prevent Link click
+          e.stopPropagation();
+          e.preventDefault();
           toggleFavorite(movie);
         }}
-        className="absolute top-3 right-3 z-20 text-2xl drop-shadow-md transition-transform hover:scale-110"
+        className="absolute top-3 right-3 z-20 flex items-center gap-1
+                   px-2 py-1 rounded-full bg-black/70 text-xs sm:text-sm
+                   text-white backdrop-blur-sm hover:scale-105
+                   transition-transform"
       >
-        {fav ? "❤️" : "🤍"}
+        {inWatchlist ? (
+          <>
+            <span>✓</span>
+            <span>In Watchlist</span>
+          </>
+        ) : (
+          <>
+            <span>＋</span>
+            <span>Watchlist</span>
+          </>
+        )}
       </button>
 
       {/* CLICKABLE PART */}
