@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { getPopularMovies, fetchMovies } from "../services/api";
 import "../App.css";
 import MovieCard from "./components/MovieCard";
+import MovieSkeletonGrid from "./components/MovieSkeletoGrid";
+
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
 import EmptyState from "../components/EmptyState";
@@ -357,7 +359,7 @@ export default function MoviesApp() {
 
           {/* CONTENT */}
           {loading && !loadingMore ? (
-            <Loader />
+            <MovieSkeletonGrid />
           ) : error ? (
             <ErrorMessage message={error} onRetry={handleRetry} />
           ) : noResults ? (
